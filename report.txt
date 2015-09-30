@@ -1,0 +1,268 @@
+Description of Python Scripts:
+-----------------------------
+
+1) email_transform.py :
+-----------------------
+	
+Reads all the email files present in the email folder which is placed in the current working directory and combines them into a single consolidated file called email_consolidated_data.txt which contains the data of all the emails. The enron.vocab file is also read from the email folder and then consolidated data is converted to the project data format by comparing the words in the emails with the ones present in the enron.vocab file. This file is saved as spam_project_data.txt
+
+It also converts all the test emails to the desired project data format. It reads the email files from spam_or_ham_test folder, combines all the files into a single file called email_test_data.txt, uses enron.vocab present in the email folder and converts the consolidated data into the project data format. This file is saved as spam_project_test_data.txt
+
+
+Desired Files and Folders to be present in the same directory as email_transform.py -
+-----------------------------------------------------------------------------------
+	 'email' folder containing enron1,enron2,enron4,enron5 and the corresponding ham , spam folders which eventually contains all 		  the email data.
+	 'spam_or_ham_test' folder containing all the test data
+
+Command : python3 email_tranform.py
+-------
+
+After executing this script both the training and test data will be converted to the project data format. 
+
+2) imdb_transform.py : 
+----------------------
+
+This script is to convert all the ratings into labels (POSITIVE,NEGATIVE) and also increment each feature by 1. It takes 2 arguments. The first argument is the input file (e.g. labeledBow.feat.fixed and not labeledBow.feat). The second argument is the name of the output file where you desire to store the project data format (e.g. sentiment_project_data.txt)
+
+Command : python3 imdb_transform.py <inputfile> <outputfile>
+-------
+
+Eg : python3 imdb_transform.py labeledBow.feat.fixed sentiment_project_data.txt
+---
+
+3) input_split.py :
+-------------------
+
+This script splits the corpus into training and development data. It takes 2 arguments. The first argument is the name of the file which was given as the output filename while executing imdb_transform.py (e.g. sentiment_project_data.txt) and the second argument is either 75 or 25 to specify how much percentage of the input file is to be split and used as training data and the remaining data will be used for development. The training and development data are stored in training.txt and dev.txt respectively.
+
+Command : python3 input_split.py <inputfile> <percentage_split>
+-------
+
+Eg : python3 input_split.py sentiment_project_data.txt 75
+---
+
+4) nblearn.py :
+-------------
+
+This script takes the training data and computes the number of occurences of each word in each class and stores it in a model file.
+It takes 2 arguments. The first argument is the training data and the second argument is the model file. The training data should be one of the files in the project data format with labels as POSITIVE or NEGATIVE and features starting from 1. It should either be sentiment_project_data.txt (obtained from imdb_transform.py) or spam_project_data.txt (obtained from email_transform.py) or one of the training.txt which is obtained after executing input_split.py . The model filename should be either spam.nb.model or sentiment.nb.model depending on the kind of data being classified.
+
+Command : python3 nblearn.py <trainingfile> <modelfile>
+-------
+
+Eg : python3 nblearn.py training.txt sentiment.nb.model
+---
+
+5) nbclassify.py : 
+----------------
+
+This script takes the model file and test data as input and predicts the labels for the test data using the probabilities stored in the model file.It takes 2 arguments. The first argument is the name of the model file which should be either spam.nb.model or sentiment.nb.model. The second argument is the test data which should have features starting with index 1. The test data should be either spam_project_test_data.txt (obtained from email_transform.py) or sentiment.feat.fixed or one of the dev.txt which is obtained after executing input_split.py . The actual labels present in case of development data are written to a file (to make calculations easier) called output.txt which will be used by nbcompute.py for computing the precision,recall, F-score and so on. The predicted labels are printed in STDOUT which can then be stored into an output file called spam.nb.out or sentiment.nb.out depending on the kind of data veing classified
+
+Command : python3 nbclassify.py <modelfile> <testfile> > <outputfile>
+-------
+
+Eg : python3 nbclassify.py sentiment.nb.model dev.txt > sentiment.nb.out
+---
+
+6) nbcompute.py :
+---------------
+
+This script is used to compute the accuracy,precision,recall and f-score of each class for the Naive Bayes classifier. It takes 2 arguments. The first argument should be one of the development data file with labels. The second argument should be either spam.nb.out or sentiment.nb.out
+
+Command : python3 nbcompute.py <development_data> <outputfile>
+--------
+
+Eg : python3 nbcompute.py dev.txt sentiment.nb.out
+---
+
+7) svm_transform.py :
+--------------------
+
+This script is used to transform the training data in project data format into a format which can be given as input to the SVM classifier. It converts the labels POSITIVE or HAM to "+1" and NEGATIVE or SPAM to "-1". It takes 2 arguments. The first argument is the training data in project data format and the second argument is the output filename
+
+Command : python3 svm_transform.py <training_data> <transformed_file>
+-------
+
+Eg : python3 svm_transform.py sentiment_project_data.txt svm_transform_project_data.txt
+---
+
+8) svm_postprocess.py :
+---------------------
+
+This script is used to postprocess the predicted labels by converting "+1" to "POSITIVE" if the second argument is "sentiment" or "HAM" if the second argument is "spam" and "-1" to "NEGATIVE" if the second argument is "sentiment" or "SPAM" if the second argument is "spam". It takes 2 arguments. The first argument is the predictions file which is obtained after executing the ./svm_classify command. The second argument is either "sentiment" or "spam" to postprocess correctly. The results are then written into an output file which is sentiment.svm.out or spam.svm.out
+
+Command : python3 svm_postprocess.py <predictions> <spam or sentiment> > <outputfile>
+-------
+
+Eg : python3 svm_postprocess.py predictions sentiment > sentiment.svm.out
+---
+
+9) svm_compute.py :
+-----------------
+
+This script is used to compute the accuracy,precision,recall and f-score of each class for the SVM classifier. It takes 2 arguments. The first argument should be one of the development data file with labels as "+1" or "-1". The second argument should be either spam.nb.out or sentiment.nb.out
+
+Command : python3 svm_compute.py <development_data> <outputfile>
+-------
+
+Eg : python3 svm_compute.py dev.txt sentiment.svm.out
+---
+
+10) megam_transform.py :
+----------------------
+
+This script is used to transform the training data in project data format into a format which can be given as input to the MegaM classifier. It converts the labels POSITIVE or HAM to "1" and NEGATIVE or SPAM to "0".  It takes 2 arguments. The first argument is the training data in project data format and the second argument is the output filename
+
+Command : python3 megam_transform.py <training_data> <transformed_file>
+-------
+
+Eg : python3 megam_transform.py sentiment_project_data.txt megam_transform_project_data.txt
+---
+
+11) megam_postprocess.py :
+------------------------
+
+This script is used to postprocess the predicted labels by converting "1" to "POSITIVE" if the second argument is "sentiment" or "HAM" if the second argument is "spam" and "0" to "NEGATIVE" if the second argument is "sentiment" or "SPAM" if the second argument is "spam". It takes 2 arguments. The first argument is the predictions file which is obtained after executing the ./megam.opt 
+-predict command. The second argument is either "sentiment" or "spam" to postprocess correctly. The results are then written into an output file which is sentiment.megam.out or spam.megam.out
+
+Command : python3 megam_postprocess.py <predictions> <spam or sentiment> > <outputfile>
+-------
+
+Eg : python3 megam_postprocess.py predictions spam > spam.megam.out
+---
+
+12) megam_compute.py :
+--------------------
+
+This script is used to compute the accuracy,precision,recall and f-score of each class for the MegaM classifier. It takes 2 arguments. The first argument should be one of the development data file with labels as "1" or "0". The second argument should be either spam.nb.out or sentiment.nb.out
+
+Command : python3 megam_compute.py <development_data> <outputfile>
+-------
+
+Eg : python3 megam_compute.py dev.txt sentiment.megam.out
+---
+
+13) test_preprocess.py :
+----------------------
+
+This script is used to preprocess the test data for both SVM and MegaM and for both spam and sentiment data. It does not take any argument but the script reads the 2 test input files sentiment.feat.fixed and project_test_data.txt and preprocesses by adding the labels like "+1" in case of SVM and "1" in case of MegaM since they both require the data to be labelled to make a prediction. The script also increments each feature by 1. There are 6 resulting pre-processed test files namely svm_sentiment_test.txt, megam_sentiment_test.txt, nb_sentiment_test.txt, svm_spam_test.txt, megam_spam_test.txt and nb_spam_test.txt
+
+Command : python3 test_preprocess.py
+-------
+
+
+
+
+SVM Execution :
+---------------
+
+./svm_learn training.txt sentiment.svm.model
+./svm_classify -f 0 test.txt sentiment.svm.model predictions
+
+
+MegaM Execution :
+-----------------
+
+./megam.opt -fvals binary training.txt > spam.megam.model
+./megam.opt -fvals -predict spam.megam.model binary dev.txt > predictions
+
+
+
+
+RESULTS AND OBSERVATIONS :
+-------------------------
+
+
+1) Results for 75% Training Data and 25% Development Data:
+------------------------------------------------------
+
+
+SENTIMENT (NAIVE_BAYES):			SENTIMENT (SVM):				SENTIMENT (MegaM):
+------------------------			----------------				------------------
+
+Line Count : 6250				Line Count : 6250				Line Count : 6250
+Accuracy : 86.208%				Accuracy : 87.55199999999999%			Accuracy : 88.81599999999999%
+Correct: 5388					Correct: 5472					Correct: 5551		
+Incorrect: 862					Incorrect: 778					Incorrect: 699
+Positive Precision: 89.16580131533402%		Positive Precision: 86.56902461826114%  	Positive Precision: 88.70453095086151%
+Negative Precision: 83.66557572151146%		Negative Precision: 88.58927984215718%		Negative Precision: 88.92811296534018%
+Positive Recall: 82.432%			Positive Recall: 88.896%			Positive Recall: 88.96%
+Negative Recall: 89.984%			Negative Recall: 86.208%			Negative Recall: 88.672%
+Positive F-Score: 0.8566677751912205		Positive F-Score: 0.8771708241237763		Positive F-Score: 0.8883208180220483
+Negative F-score: 0.8670983657107616		Negative F-score: 0.8738241972105093		Negative F-score: 0.887998718154142
+												Error rate = 699 / 6250 = 0.11184
+
+
+The results indicate that MegaM performs the best over Naive Bayes and SVM since it has a higher precision and f-score value for each class. MegaM is a powerful classifier and is expected to be better than Naive Bayes and SVM and the results provide the evidence for it. Precision, Recall and F-score for each class varies only by a small margin in case of MegaM which indicates it classifies both classes with high precision compared to the other 2 techniques.
+
+
+
+SPAM (NAIVE_BAYES):				SPAM (SVM):					SPAM (MegaM):
+-------------------				-----------					-------------
+
+Line Count : 5551				Line Count : 5551				Line Count : 5551
+Accuracy : 98.66690686362818%			Accuracy : 95.91064673031886%			Accuracy : 98.30661142136552%
+Correct: 5477					Correct: 5324					Correct: 5457
+Incorrect: 74					Incorrect: 227					Incorrect: 94
+Ham Precision: 99.59349593495935%		Ham Precision: 99.26041261191125%		Ham Precision: 99.04270986745215%
+Spam Precision: 97.78558875219684%		Spam Precision: 93.02481556002682%		Spam Precision: 97.60141093474427%
+Ham Recall: 97.71573604060913%			Ham Recall: 92.45830311820158%			Ham Recall: 97.53444525018129%
+Spam Recall: 99.60615825277479%			Spam Recall: 99.31972789115646%			Spam Recall: 99.06910132474043%
+Ham F-Score: 0.9864568081991215			Ham F-Score: 0.9573868969401164			Ham F-Score: 0.9828279137742053
+Spam F-score: 0.9868747782901739		Spam F-score: 0.9606926406926407		Spam F-score: 0.9832977967306327
+												Error rate = 94 / 5551 = 0.0169339
+
+
+The results indicate that Naive Bayes performs the best over MegaM and SVM since it has a higher precision and f-score value for each class. But, the difference is only marginal compared to MegaM and so it cannot be told that Naive Bayes outperforms MegaM and SVM. Probably more training would have yielded better results in favor of MegaM.
+
+
+Overall, all the classifiers perform exceedingly well in SPAM detection compared to Sentiment Analysis. Hence, it can be concluded that MegaM performs the best and SVM lags behind both the techniques.
+
+
+
+2) Results for 25% Training Data and 75% Development Data:
+------------------------------------------------------
+
+
+SENTIMENT (NAIVE_BAYES):			SENTIMENT (SVM):				SENTIMENT (MegaM):
+------------------------			----------------				------------------
+
+Line Count : 18750				Line Count : 18750				Line Count : 18750
+Accuracy : 84.20266666666667%			Accuracy : 83.76533333333333%			Accuracy : 86.09066666666666%
+Correct: 15788					Correct: 15706					Correct: 16142
+Incorrect: 2962					Incorrect: 3044					Incorrect: 2608
+Positive Precision: 87.88845563039112%		Positive Precision: 82.28454869964304%		Positive Precision: 85.45530755527612%
+Negative Precision: 81.17040925439876%		Negative Precision: 85.38848518725544%		Negative Precision: 86.74921255566417%
+Positive Recall: 79.33866666666667%		Positive Recall: 86.05866666666667%		Positive Recall: 86.98666666666666%
+Negative Recall: 89.06666666666668%		Negative Recall: 81.472%			Negative Recall: 85.19466666666666%
+Positive F-Score: 0.8339499943939903		Positive F-Score: 0.8412930135557872		Positive F-Score: 0.8621418754625224
+Negative F-score: 0.849354084019937		Negative F-score: 0.8338427947598254		Negative F-score: 0.8596491228070174
+												Error rate = 2608 / 18750 = 0.139093
+
+
+It is evident that the performance did not drop drastically for any of the techniques but the drop in performance for SVM is more compared to Naive Bayes and MegaM. MegaM and Naive Bayes look more robust even when it is a small training set. Probably, SVM requires more training in order to perform better like the other 2 techniques.
+
+
+SPAM (NAIVE_BAYES):				SPAM (SVM):					SPAM (MegaM):
+-------------------				-----------					-------------
+
+Line Count : 16653				Line Count : 16653				Line Count : 16653
+Accuracy : 98.462739446346%			Accuracy : 93.94103164594968%			Accuracy : 98.00636521947997%
+Correct: 16397					Correct: 15644					Correct: 16321
+Incorrect: 256					Incorrect: 1009					Incorrect: 332
+Ham Precision: 99.25070630143718%		Ham Precision: 99.1211465657112%		Ham Precision: 98.85594784106286%
+Spam Precision: 97.70911654135338%		Spam Precision: 89.80231176407042%		Spam Precision: 97.19615204129516%
+Ham Recall: 97.64350453172206%			Ham Recall: 88.59214501510574%			Ham Recall: 97.1117824773414%
+Spam Recall: 99.271902602053%			Spam Recall: 99.22415851038434%			Spam Recall: 98.88994986870375%
+Ham F-Score: 0.9844054580896686			Ham F-Score: 0.9356135536979133			Ham F-Score: 0.9797610338941722
+Spam F-score: 0.9848431024274719		Spam F-score: 0.942784235894528			Spam F-score: 0.9803573541592712
+												Error rate = 332 / 16653 = 0.0199363
+
+
+Once again, the classifiers have performed well in SPAM detection over Sentiment Analysis for a small training as well. But, the drop in performance or the negligible difference between the corresponding 75% and 25% training data is quite similar for both SPAM detection and Sentiment Analysis.
+
+
+
+
+
+
